@@ -3,7 +3,7 @@ requests==2.25.1
 pytest==6.2.4
 click==8.0.1
 PyQt5==5.15.6
-pathlib==1.0.1
+# pathlib==1.0.1 - Removed as it's part of Python 3.4+ standard library
 python-magic-bin==0.4.14; platform_system=="Windows"
 python-magic==0.4.24; platform_system!="Windows"
 pyinstaller>=5.6.0
