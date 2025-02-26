@@ -1,5 +1,3 @@
-# File: /file-renamer/file-renamer/README.md
-
 # File Renamer Application
 
 ## Overview
