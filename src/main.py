@@ -2,6 +2,9 @@ import os
 import sys
 import traceback
 
+# Version information
+__version__ = '1.0.1'
+
 # Add the parent directory to sys.path to enable imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -31,6 +34,10 @@ except ImportError:
         # Final fallback for direct imports
         from interface import display_welcome_message as display_welcome, get_user_input, display_results, confirm_action
 
+def display_version():
+    """Display the current version of the application"""
+    print(f"File Renamer v{__version__}")
+
 def ensure_console_visible():
     """Ensure the console window is visible when running as an exe"""
     if getattr(sys, 'frozen', False):
@@ -52,6 +59,7 @@ def main():
         ensure_console_visible()
         
         display_welcome()
+        display_version()
         
         # Get user input for the renaming operation
         directory_path = get_user_input("Enter the directory path: ")
