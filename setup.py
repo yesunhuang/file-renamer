@@ -3,8 +3,8 @@ from setuptools import setup, find_packages
 setup(
     name='file-renamer',
     version='0.1.0',
-    author='Your Name',
-    author_email='your.email@example.com',
+    author='Yesun Huang',
+    author_email='yesunhuang@uchicago.edu',
     description='A tool for renaming files and folders with user-defined prefixes and extracting labels from names.',
     packages=find_packages(where='src'),
     package_dir={'': 'src'},

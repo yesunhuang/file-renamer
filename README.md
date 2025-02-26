@@ -1,15 +1,21 @@
-# File Renamer Application
+# File Renamer
 
-## Overview
-The File Renamer application is designed to help users rename multiple files or folders efficiently. It allows for user-defined prefix formats and ordering, as well as the extraction of individual labels from former names or subfolder names.
+A simple yet powerful utility for batch renaming files with customizable patterns.
 
 ## Features
-- Rename multiple files or folders with a specified prefix format.
-- Customizable ordering for renamed files.
-- Extract labels from existing file names or subfolder names.
-- User-friendly interface for easy interaction.
+
+- Rename multiple files at once with customizable patterns
+- Preview changes before applying
+- Option to remove existing prefixes and order numbers
+- Support for numbered sequences with custom formatting
+- Cross-platform compatibility
 
 ## Installation
+
+### Option 1: Download the executable (Windows)
+Download the latest executable from the [Releases](https://github.com/yourusername/file-renamer/releases) page.
+
+### Option 2: Run from source
 1. Clone the repository:
    ```
    git clone https://github.com/yourusername/file-renamer.git
