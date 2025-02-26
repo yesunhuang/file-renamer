@@ -1,0 +1,16 @@
+{
+  "default_prefix": "File_",
+  "default_ordering": "ascending",
+  "supported_extensions": [
+    ".txt",
+    ".jpg",
+    ".png",
+    ".pdf",
+    ".docx"
+  ],
+  "label_extraction": {
+    "from_name": true,
+    "from_subfolder": true
+  },
+  "output_format": "{prefix}{label}_{index}"
+}
