@@ -13,7 +13,7 @@ A simple yet powerful utility for batch renaming files with customizable pattern
 ## Installation
 
 ### Option 1: Download the executable (Windows)
-Download the latest executable from the [Releases](https://github.com/yourusername/file-renamer/releases) page.
+Download the latest executable from the [Releases](https://github.com/yesunhuang/file-renamer/releases) page.
 
 ### Option 2: Run from source
 1. Clone the repository:
