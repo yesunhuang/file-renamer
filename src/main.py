@@ -3,7 +3,7 @@ import sys
 import traceback
 
 # Version information
-__version__ = '1.2.1'
+__version__ = '1.2.2'
 
 # Add the parent directory to sys.path to enable imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
