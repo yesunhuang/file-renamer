@@ -1,14 +1,24 @@
-# File Renamer
+# File Renamer v1.2.0
 
-A simple yet powerful utility for batch renaming files with customizable patterns.
+A powerful utility for batch renaming files and managing folder structures.
 
 ## Features
 
-- Rename multiple files at once with customizable patterns
-- Preview changes before applying
-- Option to remove existing prefixes and order numbers
-- Support for numbered sequences with custom formatting
-- Cross-platform compatibility
+- **File Renaming**
+  - Rename multiple files at once with customizable prefix formats
+  - Support for sequential numbering and ordering
+  - Preview changes before applying
+  - Option to remove existing prefixes and order numbers
+
+- **Folder Management**
+  - Rename folders along with files
+  - Collapse redundant folder structures
+  - Uncollapse folders using underscore separators
+
+- **User Experience**
+  - Intuitive menu-driven interface
+  - Error handling and warnings
+  - Cross-platform compatibility
 
 ## Installation
 
@@ -18,35 +28,35 @@ Download the latest executable from the [Releases](https://github.com/yesunhuang
 ### Option 2: Run from source
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/file-renamer.git
+   git clone https://github.com/yesunhuang/file-renamer.git
    ```
-2. Navigate to the project directory:
-   ```
-   cd file-renamer
-   ```
-3. Install the required dependencies:
+2. Install the required dependencies:
    ```
    pip install -r requirements.txt
    ```
+3. Run the application:
+   ```
+   python run.py
+   ```
 
 ## Usage
-To run the application, execute the following command:
-```
-python src/main.py
-```
-Follow the prompts in the user interface to rename files or folders as desired.
 
-## Configuration
-Default settings can be modified in the `config/default_config.json` file. This includes default prefixes and ordering formats.
+### File Renaming
+1. Select "Rename files/folders" from the main menu
+2. Enter the directory path containing files to rename
+3. Specify a prefix format (e.g., "photo_", "doc_v2_")
+4. Choose whether to enable ordering (sequential numbering)
+5. Choose whether to remove existing prefixes
+6. Review the preview and confirm to apply changes
 
-## Testing
-To run the tests, navigate to the `tests` directory and execute:
-```
-pytest
-```
+### Folder Management
+1. **Collapsing Folders**: Select "Collapse redundant folders" to identify and merge nested folder structures
+2. **Uncollapsing Folders**: Select "Uncollapse folders by underscore" to expand folders with underscore-separated names into nested structures
 
 ## Contributing
+
 Contributions are welcome! Please fork the repository and submit a pull request with your changes.
 
 ## License
+
 This project is licensed under the MIT License. See the LICENSE file for details.
