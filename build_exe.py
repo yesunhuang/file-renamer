@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 import pkg_resources
+import PyInstaller.__main__
 
 def check_and_remove_pathlib():
     """Check if pathlib is installed as a package and remove it if needed"""
@@ -33,22 +34,31 @@ if os.path.exists("dist"):
 # Check for and remove pathlib if it exists as a package
 check_and_remove_pathlib()
 
-print("Building File Renamer executable...")
+def build_executable():
+    """Build the executable with PyInstaller"""
+    
+    # Ensure the dist directory exists
+    if not os.path.exists('dist'):
+        os.makedirs('dist')
+        
+    # Define icon path - create this file in the project root
+    icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'file_renamer_icon.ico')
+    
+    # PyInstaller command line arguments
+    args = [
+        'run.py',                    # Script to convert
+        '--onefile',                 # Create a single executable
+        '--name=FileRenamer',        # Name of the executable
+        '--console',                 # Show console window
+        f'--icon={icon_path}',       # Add application icon
+        '--clean',                   # Clean PyInstaller cache
+        '--add-data=src;src',        # Include the src directory
+    ]
+    
+    # Run PyInstaller
+    PyInstaller.__main__.run(args)
+    
+    print("Executable built successfully!")
 
-try:
-    import PyInstaller.__main__
-    
-    PyInstaller.__main__.run([
-        'run.py',                         # Use run.py as the entry point
-        '--name=FileRenamer',             # Name of the executable
-        '--onefile',                      # Create a single executable file
-        # '--add-data=config;config',      # Include the config directory if it exists
-        # '--icon=config/icon.ico',        # Include an icon if you have one
-        # '--noconsole',                   # REMOVED: We need the console window to be visible
-        '--clean',                        # Clean PyInstaller cache
-    ])
-    
-    print("Build complete! Executable is in the 'dist' folder.")
-except Exception as e:
-    print(f"Error during build: {e}")
-    sys.exit(1)
+if __name__ == "__main__":
+    build_executable()

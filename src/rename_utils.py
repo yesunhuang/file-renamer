@@ -9,20 +9,22 @@ def generate_new_name(original_name, prefix_format, order=None):
     # Extract the base name and extension
     base_name, extension = original_name.rsplit('.', 1) if '.' in original_name else (original_name, '')
     
-    # Apply the prefix format to get prefixed name
-    if not prefix_format:
-        prefixed_name = base_name
-    else:
-        # If the prefix already ends with underscore, don't add another
-        if prefix_format.endswith('_'):
-            prefixed_name = f"{prefix_format}"
-        else:
-            prefixed_name = f"{prefix_format}_"
+    # Handle empty prefix format - just return original name if no order is specified
+    if not prefix_format and order is None:
+        return original_name
+    
+    # Apply the prefix format without adding an underscore automatically
+    prefixed_name = prefix_format if prefix_format else ""
             
     # Insert order between prefix and base name if specified
-    if order:
-        new_name = f"{prefixed_name}{order}_{base_name}"
+    if order is not None:
+        # If prefix exists and doesn't end with an underscore, add one before the order
+        if prefixed_name and not prefixed_name.endswith('_'):
+            new_name = f"{prefixed_name}{order}_{base_name}"
+        else:
+            new_name = f"{prefixed_name}{order}_{base_name}"
     else:
+        # Don't add any underscore between prefix and base name
         new_name = f"{prefixed_name}{base_name}"
     
     # Reattach the extension if it exists

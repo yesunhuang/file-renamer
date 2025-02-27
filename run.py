@@ -15,19 +15,13 @@ This simply imports and runs the main function from src/main.py
 """
 import os
 import sys
-import traceback
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-try:
-    # Import the main function from src/main.py
-    from src.main import main
-    
-    # Run the main function
-    if __name__ == "__main__":
-        main()
-except Exception as e:
-    print(f"Failed to start the application: {e}")
-    print(traceback.format_exc())
-    input("Press Enter to exit...")
+# Import the main function from src/main.py
+from src.main import main
+
+# Run the main function
+if __name__ == "__main__":
+    main()
