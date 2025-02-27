@@ -25,6 +25,18 @@ except ImportError:
         generate_new_name = rename_utils.generate_new_name
         find_longest_common_prefix = rename_utils.find_longest_common_prefix
 
+# Add import for the folder operations
+try:
+    from src.folder_operations import collapse_redundant_folders, uncollapse_folders
+except ImportError:
+    try:
+        from folder_operations import collapse_redundant_folders, uncollapse_folders
+    except ImportError:
+        # Final fallback for direct imports when running from src directory
+        import folder_operations
+        collapse_redundant_folders = folder_operations.collapse_redundant_folders
+        uncollapse_folders = folder_operations.uncollapse_folders
+
 # Import UI components
 try:
     from src.ui.interface import display_welcome_message as display_welcome, get_user_input, display_results, confirm_action
@@ -192,11 +204,129 @@ def show_main_menu():
     print("="*50)
     print("1. Rename files/folders")
     print("2. Display version information")
-    print("3. Exit application")
+    print("3. Collapse redundant folders")
+    print("4. Uncollapse folders by underscore") # New option
+    print("5. Exit application")
     print("="*50)
     
-    choice = get_user_input("Enter your choice (1-3): ")
+    choice = get_user_input("Enter your choice (1-5): ")
     return choice
+
+def run_folder_collapse_operation():
+    """Run the folder collapse operation"""
+    try:
+        display_welcome()
+        display_version()
+        
+        # Get user input for the directory
+        directory_path = get_user_input("Enter the directory path to scan for redundant folders: ")
+        if not directory_path:
+            print("No directory path provided.")
+            return
+            
+        # Check if directory exists
+        if not os.path.exists(directory_path) or not os.path.isdir(directory_path):
+            print(f"Directory does not exist: {directory_path}")
+            return
+            
+        # Ask if user wants recursive collapsing
+        recursive = get_user_input("Collapse folders recursively? (y/n): ")
+        if not recursive:
+            recursive = "y"
+        recursive = recursive.lower() in ['y', 'yes']
+        
+        # Preview the folders that will be collapsed
+        print("\nScanning for redundant folders...")
+        
+        # Import the identify function only when needed
+        from src.folder_operations import identify_redundant_folders
+        redundant_folders = identify_redundant_folders(directory_path)
+        
+        if redundant_folders:
+            print(f"\nFound {len(redundant_folders)} redundant folder structure(s):")
+            for parent, child in redundant_folders:
+                print(f"  {parent} → {child}")
+                
+            # Ask for confirmation before proceeding
+            if confirm_action("proceed with collapsing folders"):
+                # Perform the collapsing operation
+                collapsed_folders = collapse_redundant_folders(directory_path, recursive)
+                
+                # Display results
+                if collapsed_folders:
+                    print(f"\nSuccessfully collapsed {len(collapsed_folders)} folder(s):")
+                    for folder in collapsed_folders:
+                        print(f"  {folder}")
+                else:
+                    print("No folders were collapsed.")
+        else:
+            print("No redundant folders found.")
+            
+    except Exception as e:
+        print(f"An unexpected error occurred: {str(e)}")
+        print(traceback.format_exc())
+
+def run_folder_uncollapse_operation():
+    """Run the folder uncollapse operation"""
+    try:
+        display_welcome()
+        display_version()
+        
+        # Get user input for the directory
+        directory_path = get_user_input("Enter the directory path containing folders to uncollapse: ")
+        if not directory_path:
+            print("No directory path provided.")
+            return
+            
+        # Check if directory exists
+        if not os.path.exists(directory_path) or not os.path.isdir(directory_path):
+            print(f"Directory does not exist: {directory_path}")
+            return
+            
+        # Ask for minimum underscore parts to consider
+        min_parts_str = get_user_input("Minimum name parts to uncollapse (default: 2): ")
+        try:
+            min_parts = int(min_parts_str) if min_parts_str else 2
+        except ValueError:
+            min_parts = 2
+            print("Invalid number. Using default value of 2.")
+        
+        # Preview the folders that can be uncollapsed
+        print("\nScanning for folders to uncollapse...")
+        
+        # Find folders with names containing underscores
+        potential_folders = []
+        for item in os.listdir(directory_path):
+            full_path = os.path.join(directory_path, item)
+            if os.path.isdir(full_path) and len(item.split('_')) >= min_parts:
+                potential_folders.append(full_path)
+        
+        if potential_folders:
+            print(f"\nFound {len(potential_folders)} folder(s) to uncollapse:")
+            for folder in potential_folders:
+                folder_name = os.path.basename(folder)
+                parts = folder_name.split('_')
+                new_structure = ' → '.join(parts)
+                print(f"  {folder_name} → [{new_structure}]")
+                
+            # Ask for confirmation before proceeding
+            if confirm_action("proceed with uncollapsing folders"):
+                # Perform the uncollapsing operation
+                uncollapsed_folders = uncollapse_folders(directory_path, min_parts)
+                
+                # Display results
+                if uncollapsed_folders:
+                    print(f"\nSuccessfully uncollapsed {len(uncollapsed_folders)} folder(s):")
+                    for folder in uncollapsed_folders:
+                        print(f"  {folder}")
+                else:
+                    print("No folders were uncollapsed.")
+        else:
+            print(f"No folders with {min_parts} or more underscore-separated parts found.")
+            
+    except Exception as e:
+        print(f"An unexpected error occurred: {str(e)}")
+        print(traceback.format_exc())
 
 def main():
     try:
@@ -213,10 +343,14 @@ def main():
                 display_version()
                 input("Press Enter to continue...")
             elif choice == "3":
+                run_folder_collapse_operation()
+            elif choice == "4": # New option
+                run_folder_uncollapse_operation()
+            elif choice == "5": # Updated option number
                 print("Exiting application...")
                 break
             else:
-                print("Invalid choice. Please enter a number between 1 and 3.")
+                print("Invalid choice. Please enter a number between 1 and 5.")
                 
     except Exception as e:
         print(f"An unexpected error occurred: {str(e)}")
