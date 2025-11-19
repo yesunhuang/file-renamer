@@ -1,6 +1,6 @@
-# File Renamer v1.2.0
+# File Renamer v1.3.0
 
-A powerful utility for batch renaming files and managing folder structures.
+A powerful utility for batch renaming files and managing folder structures, now with advanced AI capabilities.
 
 ## Features
 
@@ -9,14 +9,22 @@ A powerful utility for batch renaming files and managing folder structures.
   - Support for sequential numbering and ordering
   - Preview changes before applying
   - Option to remove existing prefixes and order numbers
+  - **Include Folders**: Rename directories alongside files
 
 - **Folder Management**
-  - Rename folders along with files
-  - Collapse redundant folder structures
-  - Uncollapse folders using underscore separators
+  - **Collapse Redundant Folders**: Identify and merge nested folder structures (e.g., `parent/child` -> `parent_child`)
+  - **Uncollapse Folders**: Expand folders with underscore-separated names into nested structures
+  - Recursive processing support
+
+- **AI Renaming**
+  - **Multi-Provider Support**: Choose between Google Gemini and OpenAI models
+  - **Model Selection**: Select specific models (e.g., Gemini 1.5 Flash, GPT-4)
+  - **Prompt Preview**: View the exact system instruction and file list sent to the AI
+  - **Smart Suggestions**: Generate meaningful names based on file content or patterns
 
 - **User Experience**
   - Intuitive menu-driven interface
+  - Modern GUI with dedicated tabs for Manual, AI, and Folder operations
   - Error handling and warnings
   - Cross-platform compatibility
 
@@ -42,7 +50,7 @@ Download the latest executable from the [Releases](https://github.com/yesunhuang
 ## Usage
 
 ### File Renaming
-1. Select "Rename files/folders" from the main menu
+1. Select "Rename files/folders" from the main menu or "Manual Rename" tab in GUI
 2. Enter the directory path containing files to rename
 3. Specify a prefix format (e.g., "photo_", "doc_v2_")
 4. Choose whether to enable ordering (sequential numbering)
@@ -52,6 +60,14 @@ Download the latest executable from the [Releases](https://github.com/yesunhuang
 ### Folder Management
 1. **Collapsing Folders**: Select "Collapse redundant folders" to identify and merge nested folder structures
 2. **Uncollapsing Folders**: Select "Uncollapse folders by underscore" to expand folders with underscore-separated names into nested structures
+
+### AI Renaming
+1. Go to the "AI Rename" tab
+2. Select your provider (Gemini/OpenAI) and Model
+3. Enter a natural language instruction (e.g., "Rename these music files to Artist - Title format")
+4. Click "Preview Prompt" to verify what will be sent
+5. Click "Generate Suggestions" to see AI-proposed names
+6. Apply the changes if satisfied
 
 ## Contributing
 

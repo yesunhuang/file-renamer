@@ -44,15 +44,20 @@ def build_executable():
     # Define icon path - create this file in the project root
     icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'file_renamer_icon.ico')
     
+    # Get the directory where this script is located
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    run_script_path = os.path.join(script_dir, 'run.py')
+    src_path = os.path.join(script_dir, 'src')
+    
     # PyInstaller command line arguments
     args = [
-        'run.py',                    # Script to convert
+        run_script_path,             # Script to convert
         '--onefile',                 # Create a single executable
         '--name=FileRenamer',        # Name of the executable
-        '--console',                 # Show console window
+        '--noconsole',               # Hide console window
         f'--icon={icon_path}',       # Add application icon
         '--clean',                   # Clean PyInstaller cache
-        '--add-data=src;src',        # Include the src directory
+        f'--add-data={src_path};src', # Include the src directory
     ]
     
     # Run PyInstaller

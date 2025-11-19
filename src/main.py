@@ -3,7 +3,7 @@ import sys
 import traceback
 
 # Version information
-__version__ = '1.2.2'
+__version__ = '1.3.0'
 
 # Add the parent directory to sys.path to enable imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -206,10 +206,11 @@ def show_main_menu():
     print("2. Display version information")
     print("3. Collapse redundant folders")
     print("4. Uncollapse folders by underscore") # New option
-    print("5. Exit application")
+    print("5. AI Rename (New)")
+    print("6. Exit application")
     print("="*50)
     
-    choice = get_user_input("Enter your choice (1-5): ")
+    choice = get_user_input("Enter your choice (1-6): ")
     return choice
 
 def run_folder_collapse_operation():
@@ -328,6 +329,88 @@ def run_folder_uncollapse_operation():
         print(f"An unexpected error occurred: {str(e)}")
         print(traceback.format_exc())
 
+def run_ai_renaming_operation():
+    """Run the AI renaming operation via CLI"""
+    try:
+        display_welcome()
+        display_version()
+        print("\n--- AI Rename Mode ---")
+        
+        # Lazy import to avoid circular deps or early init issues
+        from src.config_manager import ConfigManager
+        from src.ai_renamer import AIRenamer
+        
+        config_manager = ConfigManager()
+        ai_renamer = AIRenamer(config_manager)
+        
+        # Check keys
+        gemini_key = config_manager.get_api_key("gemini")
+        openai_key = config_manager.get_api_key("openai")
+        
+        if not gemini_key and not openai_key:
+            print("No API keys found. Please configure keys in the GUI or settings.json first.")
+            return
+
+        directory_path = get_user_input("Enter the directory path: ")
+        if not directory_path or not os.path.exists(directory_path):
+            print("Invalid directory.")
+            return
+            
+        prompt = get_user_input("Enter renaming instruction: ")
+        if not prompt:
+            return
+            
+        print("Available providers:")
+        if gemini_key: print("1. Gemini")
+        if openai_key: print("2. OpenAI")
+        
+        provider_choice = get_user_input("Select provider (1/2): ")
+        provider = "gemini" if provider_choice == "1" else "openai"
+        
+        if provider == "gemini" and not gemini_key:
+            print("Gemini key not configured.")
+            return
+        if provider == "openai" and not openai_key:
+            print("OpenAI key not configured.")
+            return
+            
+        # Ask if user wants to rename folders as well
+        include_folders = get_user_input("Include folders in renaming? (y/n): ")
+        if not include_folders:
+            include_folders = "n"
+        include_folders = include_folders.lower() in ['y', 'yes']
+
+        # Get files and optionally folders
+        items = get_items_to_rename(directory_path, include_folders=include_folders)
+        if not items:
+            print(f"No {'items' if include_folders else 'files'} found.")
+            return
+            
+        print("Generating suggestions... (this may take a moment)")
+        try:
+            suggestions = ai_renamer.get_rename_suggestions(items, prompt, provider)
+            
+            print("\nPreview:")
+            for old, new in suggestions:
+                print(f"  {os.path.basename(old)} -> {new}")
+                
+            if confirm_action("apply these changes"):
+                for old_path, new_name in suggestions:
+                    dir_path = os.path.dirname(old_path)
+                    new_path = os.path.join(dir_path, new_name)
+                    if old_path != new_path:
+                        try:
+                            os.rename(old_path, new_path)
+                            print(f"Renamed: {os.path.basename(old_path)} -> {new_name}")
+                        except Exception as e:
+                            print(f"Error renaming {os.path.basename(old_path)}: {e}")
+        except Exception as e:
+            print(f"AI Error: {e}")
+            
+    except Exception as e:
+        print(f"An unexpected error occurred: {str(e)}")
+        print(traceback.format_exc())
+
 def main():
     try:
         # Make sure console is visible when running as executable
@@ -346,11 +429,13 @@ def main():
                 run_folder_collapse_operation()
             elif choice == "4": # New option
                 run_folder_uncollapse_operation()
-            elif choice == "5": # Updated option number
+            elif choice == "5":
+                run_ai_renaming_operation()
+            elif choice == "6":
                 print("Exiting application...")
                 break
             else:
-                print("Invalid choice. Please enter a number between 1 and 5.")
+                print("Invalid choice. Please enter a number between 1 and 6.")
                 
     except Exception as e:
         print(f"An unexpected error occurred: {str(e)}")

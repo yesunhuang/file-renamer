@@ -24,4 +24,17 @@ from src.main import main
 
 # Run the main function
 if __name__ == "__main__":
-    main()
+    if "--cli" in sys.argv:
+        main()
+    else:
+        try:
+            from src.ui.gui import run_gui
+            run_gui()
+        except ImportError as e:
+            print(f"Failed to load GUI: {e}")
+            print("Falling back to CLI...")
+            main()
+        except Exception as e:
+            print(f"Error running GUI: {e}")
+            print("Falling back to CLI...")
+            main()
