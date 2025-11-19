@@ -2,6 +2,10 @@ name: Build and Release
 
 on:
   push:
+    branches:
+      - main
+    paths:
+      - 'VERSION'
     tags:
       - 'v*'
 
@@ -34,11 +38,30 @@ jobs:
     - name: Build executable
       run: python build_exe.py
     
+    - name: Get version from VERSION file
+      id: get_version
+      run: |
+        $version = Get-Content VERSION -Raw
+        $version = $version.Trim()
+        echo "version=v$version" >> $env:GITHUB_OUTPUT
+      shell: pwsh
+    
+    - name: Create and push tag
+      if: github.ref == 'refs/heads/main'
+      run: |
+        $version = "${{ steps.get_version.outputs.version }}"
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git tag -a $version -m "Release $version"
+        git push origin $version
+      shell: pwsh
+    
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
         files: ./dist/FileRenamer.exe
-        name: File Renamer ${{ github.ref_name }}
+        tag_name: ${{ steps.get_version.outputs.version }}
+        name: File Renamer ${{ steps.get_version.outputs.version }}
         draft: false
         prerelease: false
       env:
