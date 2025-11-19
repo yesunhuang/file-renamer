@@ -1,4 +1,4 @@
-# File Renamer v1.3.0
+# File Renamer v1.3.1
 
 A powerful utility for batch renaming files and managing folder structures, now with advanced AI capabilities.
 
