@@ -58,6 +58,7 @@ def build_executable():
         f'--icon={icon_path}',       # Add application icon
         '--clean',                   # Clean PyInstaller cache
         f'--add-data={src_path};src', # Include the src directory
+        f'--add-data={icon_path};.',   # Include the icon file
     ]
     
     # Run PyInstaller

@@ -1,4 +1,4 @@
-# File Renamer v1.3.1
+# File Renamer v1.5.0
 
 A powerful utility for batch renaming files and managing folder structures, now with advanced AI capabilities.
 
@@ -7,6 +7,7 @@ A powerful utility for batch renaming files and managing folder structures, now 
 - **File Renaming**
   - Rename multiple files at once with customizable prefix formats
   - Support for sequential numbering and ordering
+  - **Regex Renaming**: Advanced batch renaming using Regular Expressions (with pattern and replacement)
   - Preview changes before applying
   - Option to remove existing prefixes and order numbers
   - **Include Folders**: Rename directories alongside files
@@ -18,6 +19,7 @@ A powerful utility for batch renaming files and managing folder structures, now 
 
 - **AI Renaming**
   - **Multi-Provider Support**: Choose between Google Gemini and OpenAI models
+  - **Dynamic Model Fetching**: Automatically fetches available models from the API
   - **Model Selection**: Select specific models (e.g., Gemini 1.5 Flash, GPT-4)
   - **Prompt Preview**: View the exact system instruction and file list sent to the AI
   - **Smart Suggestions**: Generate meaningful names based on file content or patterns
@@ -55,7 +57,12 @@ Download the latest executable from the [Releases](https://github.com/yesunhuang
 3. Specify a prefix format (e.g., "photo_", "doc_v2_")
 4. Choose whether to enable ordering (sequential numbering)
 5. Choose whether to remove existing prefixes
-6. Review the preview and confirm to apply changes
+6. **(Advanced) Regex Renaming**:
+   - Check "Enable Regex" to unlock the input fields
+   - Enter a valid Python RegEx in the "Pattern" field (e.g., `^(\w+)_(\d+)`)
+   - Enter the replacement string in the "Replace" field, using `\1`, `\2` for groups (e.g., `Img_\2_\1`)
+   - *Note: Regex replacements occur **before** applying any new prefixes or ordering.*
+7. Review the preview and confirm to apply changes
 
 ### Folder Management
 1. **Collapsing Folders**: Select "Collapse redundant folders" to identify and merge nested folder structures
@@ -63,7 +70,8 @@ Download the latest executable from the [Releases](https://github.com/yesunhuang
 
 ### AI Renaming
 1. Go to the "AI Rename" tab
-2. Select your provider (Gemini/OpenAI) and Model
+2. Select your provider (Gemini/OpenAI). The application will automatically fetch the latest available models from the API.
+3. Select a Model from the dropdown list
 3. Enter a natural language instruction (e.g., "Rename these music files to Artist - Title format")
 4. Click "Preview Prompt" to verify what will be sent
 5. Click "Generate Suggestions" to see AI-proposed names

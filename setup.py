@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='file-renamer',
-    version='1.4.0',
+    version='1.5.0',
     author='Yesun Huang',
     author_email='yesunhuang@uchicago.edu',
     description='A tool for renaming files and folders with user-defined prefixes and extracting labels from names.',

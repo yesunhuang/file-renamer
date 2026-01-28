@@ -4,12 +4,23 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                              QLabel, QLineEdit, QPushButton, QTextEdit, QTabWidget, 
                              QFileDialog, QComboBox, QTableWidget, QTableWidgetItem, 
                              QHeaderView, QMessageBox, QCheckBox, QGroupBox, QDialog)
+from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from src.config_manager import ConfigManager
 from src.ai_renamer import AIRenamer
 from src.file_operations import rename_files
-from src.rename_utils import generate_new_name
+from src.rename_utils import generate_new_name, apply_regex_rename
 from src.folder_operations import collapse_redundant_folders, uncollapse_folders, identify_redundant_folders
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+    return os.path.join(base_path, relative_path)
 
 class ModelFetcherThread(QThread):
     models_fetched = pyqtSignal(str, list)
@@ -28,6 +39,7 @@ class PromptPreviewDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("AI Prompt Preview")
         self.setGeometry(200, 200, 600, 500)
+        self.setWindowIcon(QIcon(resource_path("file_renamer_icon.ico")))
         
         layout = QVBoxLayout(self)
         
@@ -58,6 +70,7 @@ class FileRenamerGUI(QMainWindow):
     def init_ui(self):
         self.setWindowTitle("Advanced AI File Renamer")
         self.setGeometry(100, 100, 900, 700)
+        self.setWindowIcon(QIcon(resource_path("file_renamer_icon.ico")))
         
         # Main layout
         main_widget = QWidget()
@@ -151,6 +164,32 @@ class FileRenamerGUI(QMainWindow):
         
         self.remove_prefix_check = QCheckBox("Remove Existing Prefixes")
         options_layout.addWidget(self.remove_prefix_check)
+
+        # Regex Section
+        regex_group = QGroupBox("Regex Renaming (Advanced)")
+        regex_layout = QVBoxLayout()
+        
+        self.regex_enable_check = QCheckBox("Enable Regex")
+        self.regex_enable_check.stateChanged.connect(self.toggle_regex_inputs)
+        regex_layout.addWidget(self.regex_enable_check)
+        
+        regex_form = QHBoxLayout()
+        self.regex_pattern_input = QLineEdit()
+        self.regex_pattern_input.setPlaceholderText("Pattern (e.g., ^(\\w+)_(\\d+))")
+        self.regex_pattern_input.setEnabled(False)
+        
+        self.regex_repl_input = QLineEdit()
+        self.regex_repl_input.setPlaceholderText("Replacement (e.g., \\2 - \\1)")
+        self.regex_repl_input.setEnabled(False)
+        
+        regex_form.addWidget(QLabel("Pattern:"))
+        regex_form.addWidget(self.regex_pattern_input)
+        regex_form.addWidget(QLabel("Replace:"))
+        regex_form.addWidget(self.regex_repl_input)
+        
+        regex_layout.addLayout(regex_form)
+        regex_group.setLayout(regex_layout)
+        options_layout.addWidget(regex_group)
 
         self.manual_include_folders = QCheckBox("Include Folders")
         options_layout.addWidget(self.manual_include_folders)
@@ -431,14 +470,25 @@ class FileRenamerGUI(QMainWindow):
         prefix = self.prefix_input.text()
         ordering = self.ordering_check.isChecked()
         
+        # Regex params
+        use_regex = self.regex_enable_check.isChecked()
+        regex_pattern = self.regex_pattern_input.text()
+        regex_repl = self.regex_repl_input.text()
+        
         # Simple preview logic (simplified version of main.py logic)
         self.manual_table.setRowCount(len(files))
         self.manual_preview_data = [] # Store for applying
         
         for i, file_path in enumerate(files):
             old_name = os.path.basename(file_path)
+            
+            # Apply Regex First if enabled
+            intermediate_name = old_name
+            if use_regex:
+                intermediate_name = apply_regex_rename(old_name, regex_pattern, regex_repl)
+                
             order_val = i + 1 if ordering else None
-            new_name = generate_new_name(old_name, prefix, order_val)
+            new_name = generate_new_name(intermediate_name, prefix, order_val)
             
             self.manual_table.setItem(i, 0, QTableWidgetItem(old_name))
             self.manual_table.setItem(i, 1, QTableWidgetItem(new_name))
@@ -627,6 +677,11 @@ class FileRenamerGUI(QMainWindow):
                 self.folder_results.setText("No folders were uncollapsed.")
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
+
+    def toggle_regex_inputs(self, state):
+        enabled = (state == Qt.Checked)
+        self.regex_pattern_input.setEnabled(enabled)
+        self.regex_repl_input.setEnabled(enabled)
 
 def run_gui():
     app = QApplication(sys.argv)

@@ -33,6 +33,27 @@ def generate_new_name(original_name, prefix_format, order=None):
     
     return new_name
 
+def apply_regex_rename(name, pattern, replacement):
+    """
+    Apply regular expression replacement to the name.
+    
+    Args:
+        name (str): Original filename
+        pattern (str): Regex pattern
+        replacement (str): Replacement string
+        
+    Returns:
+        str: New name after regex replacement
+    """
+    try:
+        if not pattern:
+            return name
+        return re.sub(pattern, replacement, name)
+    except re.error:
+        # Return original name on invalid regex, caller should handle validation if possible
+        # or we just let it fail silently here to avoid crashing midway
+        return name
+
 def apply_prefix_format(base_name, prefix_format):
     """
     Apply the user-defined prefix format to the base name.
