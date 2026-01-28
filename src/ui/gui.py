@@ -4,12 +4,24 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                              QLabel, QLineEdit, QPushButton, QTextEdit, QTabWidget, 
                              QFileDialog, QComboBox, QTableWidget, QTableWidgetItem, 
                              QHeaderView, QMessageBox, QCheckBox, QGroupBox, QDialog)
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from src.config_manager import ConfigManager
 from src.ai_renamer import AIRenamer
 from src.file_operations import rename_files
 from src.rename_utils import generate_new_name
 from src.folder_operations import collapse_redundant_folders, uncollapse_folders, identify_redundant_folders
+
+class ModelFetcherThread(QThread):
+    models_fetched = pyqtSignal(str, list)
+
+    def __init__(self, ai_renamer, provider):
+        super().__init__()
+        self.ai_renamer = ai_renamer
+        self.provider = provider
+
+    def run(self):
+        models = self.ai_renamer.get_available_models(self.provider)
+        self.models_fetched.emit(self.provider, models)
 
 class PromptPreviewDialog(QDialog):
     def __init__(self, system_prompt, full_prompt, parent=None):
@@ -371,16 +383,27 @@ class FileRenamerGUI(QMainWindow):
         QMessageBox.information(self, "Success", "Settings saved successfully!")
 
     def update_model_list(self, provider):
-        self.model_combo.blockSignals(True)
         self.model_combo.clear()
-        models = self.ai_renamer.get_available_models(provider)
+        self.model_combo.addItem("Loading...")
+        self.model_combo.setEnabled(False)
+        
+        self.fetcher_thread = ModelFetcherThread(self.ai_renamer, provider)
+        self.fetcher_thread.models_fetched.connect(self.on_models_fetched)
+        self.fetcher_thread.start()
+
+    def on_models_fetched(self, provider, models):
+        # Verify if the current provider is still the same (user might have switched quickly)
+        if self.provider_combo.currentText() != provider:
+            return
+            
+        self.model_combo.clear()
         self.model_combo.addItems(models)
+        self.model_combo.setEnabled(True)
         
         # Set selected model from config
         saved_model = self.config_manager.get_model(provider)
         if saved_model and saved_model in models:
             self.model_combo.setCurrentText(saved_model)
-        self.model_combo.blockSignals(False)
 
     def save_model_preference(self, model):
         if not model: return

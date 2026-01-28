@@ -10,9 +10,77 @@ class AIRenamer:
 
     def __init__(self, config_manager):
         self.config_manager = config_manager
+        self.cached_models = {}
 
     def get_available_models(self, provider):
+        """
+        Get list of available models for the provider.
+        First tries to fetch from API, falls back to hardcoded list.
+        """
+        api_key = self.config_manager.get_api_key(provider)
+        if not api_key:
+            return self.AVAILABLE_MODELS.get(provider, [])
+            
+        # Check cache first (could add expiration later, but for now per-session is fine)
+        if provider in self.cached_models:
+            return self.cached_models[provider]
+
+        try:
+            if provider == 'gemini':
+                models = self._fetch_gemini_models(api_key)
+            elif provider == 'openai':
+                models = self._fetch_openai_models(api_key)
+            else:
+                models = []
+            
+            if models:
+                self.cached_models[provider] = models
+                return models
+        except Exception as e:
+            print(f"Error fetching models for {provider}: {e}")
+            
         return self.AVAILABLE_MODELS.get(provider, [])
+
+    def _fetch_gemini_models(self, api_key):
+        url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
+            
+            models = []
+            if 'models' in data:
+                for m in data['models']:
+                    name = m['name'].replace('models/', '')
+                    # Filter for models that support generateContent and are likely chat models
+                    if 'generateContent' in m.get('supportedGenerationMethods', []) and 'gemini' in name:
+                        models.append(name)
+            return sorted(models, reverse=True)
+        except Exception as e:
+            print(f"Failed to fetch Gemini models: {e}")
+            return []
+
+    def _fetch_openai_models(self, api_key):
+        url = "https://api.openai.com/v1/models"
+        headers = {
+            "Authorization": f"Bearer {api_key}"
+        }
+        try:
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+            
+            models = []
+            if 'data' in data:
+                for m in data['data']:
+                    id = m['id']
+                    # Filter for likely chat models
+                    if id.startswith("gpt-") and "instruct" not in id and "realtime" not in id and "audio" not in id:
+                         models.append(id)
+            return sorted(models, reverse=True)
+        except Exception as e:
+            print(f"Failed to fetch OpenAI models: {e}")
+            return []
 
     def construct_prompt(self, files, user_prompt):
         """
